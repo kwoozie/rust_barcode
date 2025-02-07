@@ -1,0 +1,20 @@
+[package]
+name = "generate_barcode"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "./src/lib.rs"
+name = "barcode_lib"
+
+[dependencies]
+slint = {version = "1.8.0", features=["gettext"]}
+barcoders = {version = "2.0.0", features = ["image","ascii","svg","json"]}
+image = {version = "0.25.5"}
+regex = "1.5"  # Add this line
+
+
+
+[build-dependencies]
+slint-build = "1.8.0"
+

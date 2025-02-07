@@ -1,0 +1,215 @@
+import {Button, SpinBox,  TextEdit, ListView, ComboBox, LineEdit, VerticalBox} from "std-widgets.slint";
+
+
+export component MainWindow inherits Window
+{
+	callback barcode_generate_btn(string,string);//generate the barcode to file
+	callback barcode_preview_btn(string,string);//generate a preview
+	callback input_detected();
+	
+	pure callback generate_image(string) -> image;
+	in-out property <string> barcode_combo_value: "Code39";//the default value for the combobox
+	in-out property <image> barcode_image;
+	in-out property <string> filtered_text; //in-out creates setters and getters in the lib for us to use to set filtered_text
+
+	
+	//pure callback limit_text(string) -> string;
+	in property <string> the_barcode_value:"";//useed for the barcode text to prevent us from using the textfield which will update continously
+	in property <string> user_name;
+	in-out property <int> barcode_length;
+	
+	property <length> window_width:700px;
+	property <length> window_height:325px;
+	
+	height: window_height;
+    title: "Barcode Generator";
+    width: window_width;
+	
+	
+	main_layout:=VerticalLayout 
+	{
+		y:10px;
+	    height: parent.height;
+	    width: parent.width;
+		
+
+
+
+		///////////////////////////////////////////////////
+
+		//		Barcode Name Input Section				//
+
+		///////////////////////////////////////////////////
+			//name holder for barcode
+			enter_name_text:=Text {
+				
+		        text: "Enter Name:";
+				
+				height: 25px;
+				//techincally a horizontal layout if nested inside
+				//will take user input for name value (can be empty)
+		        name_Edit:=LineEdit {
+		            //text: "LineEdit";
+					placeholder-text: "Enter Name";
+		            x: 100px;
+		            y: 0px;
+					height: 15px;
+		            input-type: InputType.text;
+		        }
+
+		    }
+
+
+
+			///////////////////////////////////////////////////
+
+			//		Barcode Value Input Section				//
+
+			///////////////////////////////////////////////////
+			//barcode value input
+		    enter_id_text:=Text {
+		        text: "Enter ID:";
+				
+				height: 25px;
+				
+
+				//techincally a horizontal layout if nested inside
+				//will take user input for barcode value
+		         barcode_edit:=LineEdit {
+					placeholder-text: "Enter Barcode";
+		            x: 100px;
+		            y: 0px;
+					accessible-role: AccessibleRole.list-item;
+					width: 200px;
+		            height: 15px;
+					accessible-item-count: 2;
+					text <=> root.filtered_text;
+					
+					accepted(text) => {
+						
+						if (barcode-edit.text != "")
+						{
+							if (barcode_combo_value == "Code39")
+							{
+								root.barcode_preview_btn(name_Edit.text,barcode-edit.text);
+								bar_image.source = generate_image(the_barcode_value);
+							}
+							else 
+							{
+
+									root.barcode_preview_btn(name_Edit.text,barcode-edit.text);
+									if( barcode_length >11)
+									{
+										bar_image.source = generate_image(the_barcode_value);
+									}
+								
+							}
+							
+						}
+					}
+					edited(text) =>{
+						//pass the text into input_detected to filter the text
+						root.input_detected();
+					
+					
+					}
+					
+		        }
+
+				//here we setup the combobox that will change the barcode type
+				barcode_combo_box:=ComboBox {
+					x: 325px;
+					height:15px;
+					model:["Code39","EAN13","JAN","UPCA"];
+					current-index: 0;
+					
+					selected(current-value) => {barcode_combo_value = current-value;
+												barcode_edit.text= "";}
+				}
+				
+		    }
+
+			///////////////////////////////////////////////////
+
+			//			Barcode button organizer			//
+
+			///////////////////////////////////////////////////
+			//used to group the buttons together in 1 row 
+			button_layout:=HorizontalLayout 
+			{
+				//if no width or height it will use the default
+				//to fit all components
+				preview_barcode_btn:=Button{
+					text:"Generate Preview";
+					width: 150px;
+					accessible-role: AccessibleRole.combobox;
+				    height: 50px;
+					
+					clicked =>
+					{
+						
+						if (barcode-edit.text != "")
+						{
+							if (barcode_combo_value == "Code39")
+							{
+								root.barcode_preview_btn(name_Edit.text,barcode-edit.text);
+								bar_image.source = generate_image(the_barcode_value);
+							}
+							else 
+							{
+
+									root.barcode_preview_btn(name_Edit.text,barcode-edit.text);
+									if( barcode_length >11)
+									{
+										bar_image.source = generate_image(the_barcode_value);
+										
+									}
+								
+							}
+							
+						}
+
+					}
+				}
+				genrate_barcode_btn:=Button
+				{
+					text:"Generate Barcode";
+					width: 150px;
+					height: 50px;
+					clicked => 
+					{
+						root.barcode_generate_btn(name_Edit.text,barcode-edit.text)
+					}
+				}
+			}
+
+			///////////////////////////////////////////////////
+
+			//		Display name and barcode				//
+
+			///////////////////////////////////////////////////
+
+			image_data:=VerticalBox {
+				x:150px;
+				user_name_text:=Text{
+				text: user_name;				
+				}
+				
+				bar_image:=Image 
+				{//source: generate_image(the_barcode_value);
+					width: 350px;
+					height: 150px;
+					
+				}
+
+			barcode_text:=Text{
+				//x:-20px;
+				
+				text:the_barcode_value;
+			}
+		}
+
+
+	}
+
+}
