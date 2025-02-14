@@ -68,7 +68,7 @@ export component MainWindow inherits Window
 			///////////////////////////////////////////////////
 			//barcode value input
 		    enter_id_text:=Text {
-		        text: "Enter ID:";
+		        text: "Enter Barcode:";
 				
 				height: 25px;
 				
@@ -120,7 +120,7 @@ export component MainWindow inherits Window
 				barcode_combo_box:=ComboBox {
 					x: 325px;
 					height:15px;
-					model:["Code39","EAN13","JAN","UPCA"];
+					model:["Code39","EAN13"];
 					current-index: 0;
 					
 					selected(current-value) => {barcode_combo_value = current-value;

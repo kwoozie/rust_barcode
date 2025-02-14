@@ -3,7 +3,7 @@ use std::io::{BufWriter, Write};
 use std::path::Path;
 use barcoders::generators::image::Image;
 use barcoders::sym::code39::Code39;
-use barcoders::sym::ean13::{Bookland, EAN13, JAN, UPCA};
+use barcoders::sym::ean13::{Bookland, EAN13};
 use barcoders::sym::ean8::EAN8;
 use barcoders::sym::ean_supp::EANSUPP;
 use image::RgbaImage;
@@ -21,17 +21,9 @@ impl BarcodeCheck{
         {
           return  Code39::new(format!("{barcode_value}")).unwrap().encode()
         }
-        else if barcode_type == "UPCA".to_string()
-        {
-            return UPCA::new(format!("{barcode_value}")).unwrap().encode()
-        }
         else if barcode_type == "EAN13".to_string()
         {
             return EAN13::new(format!("{barcode_value}")).unwrap().encode()
-        }
-        else if barcode_type == "JAN".to_string()
-        {
-            return JAN::new(format!("{barcode_value}")).unwrap().encode()
         }
         else if barcode_type == "Bookland".to_string()
         {
@@ -185,8 +177,7 @@ main_window.on_barcode_generate_btn({
                 }
                
                //limits the text to the max size only
-                if main_window.get_filtered_text().trim().len() as usize > BarcodeCheck::barcode_limit_size(main_window.get_barcode_combo_value().trim().to_string()) 
-                    
+                if main_window.get_filtered_text().trim().len() as usize > BarcodeCheck::barcode_limit_size(main_window.get_barcode_combo_value().trim().to_string())  
                 {
                     
                     main_window.set_filtered_text(main_window.get_filtered_text().trim()[..(main_window.get_filtered_text().trim().len() as usize) -1].into());
@@ -209,7 +200,7 @@ main_window.on_barcode_generate_btn({
             move|barcode_text|{
         
 
-            let encoded_image = generate_barcode_data(main_window.get_barcode_combo_value().clone().to_string(),barcode_text.trim().to_string());
+            let encoded_image = BarcodeCheck::barcode_checker(main_window.get_barcode_combo_value().clone().to_string(),barcode_text.trim().to_string());
         
             let buffered = Image::image_buffer(100);
             
@@ -232,16 +223,21 @@ main_window.on_barcode_generate_btn({
 }
 
 
-fn generate_barcode_data(barcode_type:String,barcodess:String) -> Vec<u8>
-{
-    
-    BarcodeCheck::barcode_checker(barcode_type, barcodess)
 
-}
 
+/***********************************************************************
+ * 
+ * 
+ * Name: generate_barcode
+ * Description: export the barcode to file. It will always create in
+ * the same directory as the executable.
+ * 
+ * 
+ * 
+ ************************************************************************/
 fn generate_barcode(barcode_type:String,name:String,barcode_value:String)
 {
-    let encoded =  generate_barcode_data(barcode_type,barcode_value);
+    let encoded =  BarcodeCheck::barcode_checker(barcode_type,barcode_value);
     let png = Image::png(80);
     let bytes = png.generate(&encoded[..]).unwrap();
     let file = File::create(&Path::new(&format!("./{name}_barcode.png"))).unwrap();
@@ -249,6 +245,16 @@ fn generate_barcode(barcode_type:String,name:String,barcode_value:String)
     writer.write(&bytes[..]).unwrap();
 }
 
+
+/***********************************************************************
+ * 
+ * 
+ * Name: convert_rgba_to_slint_image
+ * Description: Generate the image for preview
+ * 
+ * 
+ * 
+ ************************************************************************/
 fn convert_rgba_to_slint_image(rgba_image: RgbaImage) -> slint::Image {
     // Extract pixel data and dimensions
     let rgba_data = rgba_image.as_flat_samples();
