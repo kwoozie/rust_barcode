@@ -15,6 +15,14 @@ slint::include_modules!();
 struct BarcodeCheck{}
 
 impl BarcodeCheck{
+
+    /**********************************************************************
+     * 
+     * Name: barcode_checker
+     * Description: A helper function to detect barcode type
+     * 
+     * 
+     ********************************************************************/
     fn barcode_checker(barcode_type:String,barcode_value:String)-> Vec<u8>
     {
         if barcode_type == "Code39".to_string()
@@ -41,18 +49,32 @@ impl BarcodeCheck{
         Code39::new(format!("{barcode_value}")).unwrap().encode()
     }
 
+    /**********************************************************************
+     * 
+     * Name: barcode_limit_size
+     * Description: A helper function to detect how to limit the barcode length
+     * 
+     * 
+     ********************************************************************/
     fn barcode_limit_size(barcode_type:String)->usize
     {
         if barcode_type == "Code39".to_string()
         {
             return 49
         }
-        //Used for EAN 13 and JAN
+        //Used for EAN 13
         else {
             return 12
         }
     }
 
+    /**********************************************************************
+     * 
+     * Name: barcode_regex_type
+     * Description: A helper function to detect how to restrict the input type
+     * 
+     * 
+     ********************************************************************/
     fn barcode_regex_type(barcode_type:String) ->Regex
     {
         if barcode_type == "Code39"
@@ -67,6 +89,12 @@ impl BarcodeCheck{
 }
 
 
+pub struct State {
+    pub main_window: MainWindow,
+    
+}
+
+
 pub fn main()
 {
     
@@ -77,10 +105,6 @@ pub fn main()
 }
 
 
-pub struct State {
-    pub main_window: MainWindow,
-    // pub todo_model: Rc<slint::VecModel<TodoItem>>,
-}
 
 
 fn init() -> State
@@ -169,6 +193,7 @@ main_window.on_barcode_generate_btn({
             //let filtered = regex_type.replace_all(&current_text, "").to_string();
             if current_text.trim().to_string() != "".to_string()
             {
+                //check if the text of string are the same if not replace it with the new text
                 if filtered != current_text.to_string() {
     
                 
@@ -176,7 +201,7 @@ main_window.on_barcode_generate_btn({
                             
                 }
                
-               //limits the text to the max size only
+               //limits the text to the max size only 
                 if main_window.get_filtered_text().trim().len() as usize > BarcodeCheck::barcode_limit_size(main_window.get_barcode_combo_value().trim().to_string())  
                 {
                     
